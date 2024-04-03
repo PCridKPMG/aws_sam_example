@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  mangum-sam-quickstart
+
+  Sample SAM Template for fastapi on lambda, via Mangum!
+
+
+Resources:
+  ApiGatewayApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: Prod
+
+  ApiFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: src/api
+      Handler: app.lambda_handler
+      Runtime: python3.11
+      Events:
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+            RestApiId: 
+              Ref: ApiGatewayApi
+      Environment:
+        Variables:
+          API_ROOT_PATH: /Prod
+
+Outputs:
+  ApiGatewayUrl:
+    Description: "API Gateway endpoint URL for FastAPI"
+    Value: !Sub "http://${ApiGatewayApi}.execute-api.localhost.localstack.cloud:4566/Prod/api/v1/"
+  DocsUrl:
+    Description: "API Gateway swagger URL for FastAPI"
+    Value: !Sub "http://${ApiGatewayApi}.execute-api.localhost.localstack.cloud:4566/Prod/docs"
+  Endpoint:
+    Description: "API Gateway endpoint ID"
+    Value: !Sub "${ApiGatewayApi}"
+  
